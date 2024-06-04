@@ -14,8 +14,8 @@ engine = create_async_engine(
     max_overflow = 0,
     pool_pre_ping = True,
     connect_args = {
-        "timeout": 15,
-        "command_timeout": 5,
+        "timeout": 30,
+        "command_timeout": 15,
         "server_settings": {
             "jit": "off",
             "application_name": config.DATABASE_APP_NAME,

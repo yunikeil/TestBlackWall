@@ -43,6 +43,8 @@ class Settings(BaseSettings):
 
     DATABASE_APP_NAME: str
     DATABASE_URL: str
+    
+    REDIS_HOST: str
     REDIS_URL: str    
     
     model_config = SettingsConfigDict(env_file=env_path, env_file_encoding='utf-8')

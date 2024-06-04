@@ -131,6 +131,7 @@ async def openapi(_: str = Depends(__temp_get_current_username)):
 
 
 if __name__ == "__main__":
+    # Не особо хорошо для прода, но думаю сойдёт для тестового
     import uvicorn
 
     uvicorn.run(
