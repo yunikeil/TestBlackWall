@@ -8,7 +8,6 @@ import uuid
 from core.settings import config
 from core.utils.setup import setup_helper
 from core.database.session import context_get_session
-from core.redis.client import get_redis_client
 from app.schemas.binance import BookTickerStream, AveragePriceStream
 from app.services.binance import (
     books_ticker_stream_service as tk_st_service,
@@ -17,22 +16,6 @@ from app.services.binance import (
 
 
 logger = logging.getLogger("uvicorn")
-
-
-class UsdtCourseWebScoket:
-    def __init__(self):
-        # Получение курса для хранения в редисе
-        # Не хватило времени дописать, лоигка такова - мы пишем в редис соотношений usdt-usd
-        # После при записи в базу данных мы сопоставляем данные курсы
-        self.ws_base_url = "wss://ws-feed.pro.coinbase.com"
-        self.ticker_sub_msg = {
-            "type": "subscribe",
-            "channels": [{"name": "ticker", "product_ids": ["USDT-USD"]}],
-        }
-
-        raise NotImplementedError
-
-    ...
 
 
 class RequestBinanceWebSocket:
@@ -57,6 +40,13 @@ class RequestBinanceWebSocket:
             except websockets.ConnectionClosedError:
                 logger.warning("Connection closed by the server. Reconnecting...")
                 await asyncio.sleep(5)
+                
+    async def handle_message(self, symbol: str, response_data: dict):
+        # todo раскидать по  модельками в бд
+        # сделаю завтра, если будет актуально
+        
+        ...      
+
 
     async def process_symbol(
         self, symbol: str, websocket: websockets.WebSocketClientProtocol
@@ -94,9 +84,6 @@ class RequestBinanceWebSocket:
 
             await asyncio.sleep(1)
 
-    async def handle_message(self, symbol: str, response_data: dict):
-        # print(symbol, self.method, response_data)
-        ...
 
 class StreamBinanceWebSocket:
     def __init__(self) -> None:

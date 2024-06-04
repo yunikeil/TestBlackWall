@@ -72,6 +72,32 @@ python src/main.py
 
 ## Other (docs copy)
 
+https://docs.cdp.coinbase.com/advanced-trade/docs/ws-channels/#ticker-batch-channel
+
+```shell
+// ticker_batch messsage
+{
+  'type': 'ticker',
+  'sequence': 1288174608,
+  'product_id': 'USDT-USD',
+  'price': '1',
+  'open_24h': '0.99981',
+  'volume_24h': '134706963.00000000',
+  'low_24h': '0.99956',
+  'high_24h': '1',
+  'volume_30d': '4689667240.54000000',
+  'best_bid': '0.99999',
+  'best_bid_size': '1659371.95',
+  'best_ask': '1.00000',
+  'best_ask_size': '528685.58',
+  'side': 'buy',
+  'time': '2024-06-04T19:18:48.558881Z',
+  'trade_id': 99369429,
+  'last_size': '500'
+}
+```
+
+
 Stream (приходит постоянно новые данные без требования запроса)
 
 https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#individual-symbol-book-ticker-streams

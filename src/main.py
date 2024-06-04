@@ -19,8 +19,7 @@ from core.utils.setup import setup_helper
 from app.routers.binance import binance_router
 
 # Нужно для корректной работы SetupHelper
-from app.scrappers import binance
-
+from app.scrappers import coinbase, binance  # noqa
 
 
 current_file_path = os.path.abspath(__file__)
