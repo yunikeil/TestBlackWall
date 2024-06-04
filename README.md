@@ -1,15 +1,10 @@
 # TestBlackWall
 
-# Зависимости
-
-Для запуска вам потребуется python 3.10+
-PostgreSQL, Redis
-
+## Info 
 
 > нужны пары BTC/ETH/USDT<->USD
 получение данных с Binance нужно реализовать через вебсокеты
 по роуту можно получать курсы либо все, либо курсы только одной валютной пары
-
 
 * Postgres +
 * Redis - Есть обёртка, в пару строк, нехватка времени
@@ -17,11 +12,58 @@ PostgreSQL, Redis
 * Pydantic +
 * Docker - Нехватка времени
 
-# Затраченное время
+
+## Dependencies
+
+Для запуска вам потребуется Docker, python3.10+ python3-env, PostgreSQL, Redis, Debian-подобная система
+
+> todo Docker compose start file
+
+## Setup
+
+1. Запустим PostgreSQL командой
+```shell
+sudo docker run --name some-postgres -e POSTGRES_PASSWORD=postgres --restart always -p  5432:5432 -d postgres
+```
+
+2. Запустим Redis командой 
+```shell
+sudo docker run --name some-redis -d --restart always -p  6379:6379 redis redis-server --save  60  1 --loglevel warning
+```
+
+3. Настроим окружение и установим зависимости
+```shell
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+4. Заполним .env файл
+```shell
+cp example.env .env
+nano .env
+```
+
+Внутри .env файла будут данные поля:
+
+> todo .env info
+
+> todo Docker compose start file
+
+## Start
+
+Для запуска введите из корня проекта команду
+
+```shell
+python src/main.py
+```
+
+## Time spent
 
 ![timemsg](assets/time.png)
 
---- 
+
+## Other (docs copy)
 
 Stream (приходит постоянно новые данные без требования запроса)
 
