@@ -17,6 +17,9 @@ PostgreSQL, Redis
 * Pydantic +
 * Docker - Нехватка времени
 
+# Затраченное время
+
+![timemsg](assets/time.png)
 
 --- 
 
