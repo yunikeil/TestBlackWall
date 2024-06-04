@@ -31,6 +31,9 @@ docs_development_security = HTTPBasic()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if config.NEED_REQUEST_DATA == config.NEED_STREAM_DATA == False:
+        raise ValueError("There is no current data source!")
+    
     error_tg_handler = ErrorHandlerTG()
     warning_tg_handler = WarningHandlerTG()
 
