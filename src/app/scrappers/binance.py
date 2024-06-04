@@ -1,8 +1,11 @@
+from typing import Literal
 import websockets
 import logging
 import asyncio
 import ujson
+import uuid
 
+from core.settings import config
 from core.utils.setup import setup_helper
 from core.database.session import context_get_session
 from core.redis.client import get_redis_client
@@ -24,78 +27,88 @@ class UsdtCourseWebScoket:
         self.ws_base_url = "wss://ws-feed.pro.coinbase.com"
         self.ticker_sub_msg = {
             "type": "subscribe",
-            "channels": [
-                {
-                    "name": "ticker",
-                    "product_ids": ["USDT-USD"]
-                }
-            ]
+            "channels": [{"name": "ticker", "product_ids": ["USDT-USD"]}],
         }
-        
+
         raise NotImplementedError
-    
+
     ...
-    
 
 
-class ApiBinanceWebSocket:
-    def __init__(self) -> None:
-        # Получение данных по запросу от клиента (нас) 
+class RequestBinanceWebSocket:
+    def __init__(self, method: Literal["ticker.price", "avgPrice"]) -> None:
+        # Получение данных по запросу от клиента (от нас)
+        # 1 секунда задержки ~500 (из 6000) запросов в минуту
+        self.method = method
+        self.symbols = ["BTCUSDT", "ETHUSDT"]
         self.ws_base_url = "wss://ws-api.binance.com:443/ws-api/v3"
-        
-        raise NotImplementedError
 
-    """Пример грязнового варианта
-    
-    class BinanceWebSocket:
-        def __init__(self, symbol):
-            self.symbol = symbol
-            self.base_url = "wss://ws-api.binance.com:443/ws-api/v3"
+    @staticmethod
+    def get_helper_start(method: Literal["ticker.price", "avgPrice"]):
+        streamer = RequestBinanceWebSocket(method)
+        return streamer.connect
 
-        async def connect(self):
-            async with websockets.connect(self.base_url) as websocket:
-                await self.send_request(websocket)
-                await self.listen(websocket)
+    async def connect(self):
+        logger.info(f'BinanceRequest listener with "{self.method}" started!')
+        while True:
+            try:
+                async with websockets.connect(self.ws_base_url) as websocket:
+                    await self.communicate(websocket)
+            except websockets.ConnectionClosedError:
+                logger.warning("Connection closed by the server. Reconnecting...")
+                await asyncio.sleep(5)
 
-        async def send_request(self, websocket):
-            request_id = str(uuid.uuid4())
-            request = {
-                "id": request_id,
-                "method": "ticker.price",
-                "params": {
-                    "symbol": self.symbol
-                }
+    async def process_symbol(
+        self, symbol: str, websocket: websockets.WebSocketClientProtocol
+    ):
+        request = ujson.dumps(
+            {
+                "id": uuid.uuid4().hex,
+                "method": self.method,
+                "params": {"symbol": symbol},
             }
-            await websocket.send(json.dumps(request))
+        )
+        await websocket.send(request)
+        response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
+        return ujson.loads(response)
 
-        async def listen(self, websocket):
-            while True:
-                response = await websocket.recv()
-                data = json.loads(response)
-                self.handle_message(data)
+    async def communicate(self, websocket: websockets.WebSocketClientProtocol):
+        while True:
+            for symbol in self.symbols:
+                try:
+                    data = await self.process_symbol(symbol, websocket)
+                    await self.handle_message(symbol, data["result"])
+                except asyncio.TimeoutError:
+                    logger.warning(
+                        "No data received in the last 10 seconds. Reconnecting..."
+                    )
+                    await websocket.close()
+                    await self.connect()
+                    break
+                except websockets.ConnectionClosedError as ex:
+                    logger.exception(ex)
+                    logger.warning("Connection closed by the server. Reconnecting...")
+                    await websocket.close()
+                    await self.connect()
+                    break
 
-        def handle_message(self, message):
-            print(message)
+            await asyncio.sleep(1)
 
-        def run(self):
-            asyncio.get_event_loop().run_until_complete(self.connect())
-
-    if __name__ == "__main__":
-        symbol = "ETHUSDT"
-        binance_ws = BinanceWebSocket(symbol)
-        binance_ws.run()
-
-    """
-
-    ...
-
+    async def handle_message(self, symbol: str, response_data: dict):
+        # print(symbol, self.method, response_data)
+        ...
 
 class StreamBinanceWebSocket:
     def __init__(self) -> None:
-        # Получение БОЛЬШОГО количества данных через stream        
+        # Получение БОЛЬШОГО количества данных через stream
         self.ws_base_url = "wss://stream.binance.com:9443/stream"
         self.ticker_param = "?streams=btcusdt@bookTicker/ethusdt@bookTicker"
         self.avg_param = "/btcusdt@avgPrice/ethusdt@avgPrice"
+
+    @staticmethod
+    def get_helper_start():
+        streamer = StreamBinanceWebSocket()
+        return streamer.connect
 
     async def connect(self):
         logger.info("Binance stream listener started!")
@@ -147,5 +160,11 @@ class StreamBinanceWebSocket:
                 break
 
 
-streamer = StreamBinanceWebSocket()
-setup_helper.add_new_coroutine_def(streamer.connect)
+if config.NEED_STREAM_DATA:
+    setup_helper.add_new_coroutine_def(StreamBinanceWebSocket.get_helper_start())
+
+if config.NEED_REQUEST_DATA:
+    ticker = RequestBinanceWebSocket.get_helper_start("ticker.price")
+    average = RequestBinanceWebSocket.get_helper_start("avgPrice")
+    setup_helper.add_new_coroutine_def(ticker)
+    setup_helper.add_new_coroutine_def(average)
