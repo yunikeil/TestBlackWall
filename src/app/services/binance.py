@@ -3,6 +3,7 @@ from typing import Literal
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import insert, select, delete, func
 
+from core.redis.client import get_redis_client
 from app.models.binance import BookTickerStreamModel, AveragePriceStreamModel
 from app.schemas.binance import BookTickerStream, AveragePriceStream
 
@@ -12,7 +13,10 @@ class BookTickerStreamService:
         pass
 
     async def create(self, db_session: AsyncSession, data: BookTickerStream):
-        stmt = insert(BookTickerStreamModel).values(data.model_dump())
+        async with get_redis_client() as redis:
+            usdt_price = float(await redis.get("USDTUSD"))
+
+        stmt = insert(BookTickerStreamModel).values({**data.model_dump(), "usdt_to_usd": usdt_price})
         await db_session.execute(stmt)
         await db_session.commit()
 
@@ -20,6 +24,7 @@ class BookTickerStreamService:
         stmt = (
             select(BookTickerStreamModel)
             .where(func.lower(BookTickerStreamModel.symbol).in_(currency))
+            .order_by(BookTickerStreamModel.created_at.desc())
             .limit(1)
         )
         query = await db_session.execute(stmt)
@@ -52,7 +57,10 @@ class AveragePriceStreamService:
         pass
 
     async def create(self, db_session: AsyncSession, data: AveragePriceStream):
-        stmt = insert(AveragePriceStreamModel).values(data.model_dump())
+        async with get_redis_client() as redis:
+            usdt_price = float(await redis.get("USDTUSD"))
+        
+        stmt = insert(AveragePriceStreamModel).values({**data.model_dump(), "usdt_to_usd": usdt_price})
         await db_session.execute(stmt)
         await db_session.commit()
 
@@ -60,6 +68,7 @@ class AveragePriceStreamService:
         stmt = (
             select(AveragePriceStreamModel)
             .where(func.lower(AveragePriceStreamModel.symbol).in_(currency))
+            .order_by(AveragePriceStreamModel.created_at.desc()) 
             .limit(1)
         )
         query = await db_session.execute(stmt)

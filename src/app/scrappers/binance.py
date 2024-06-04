@@ -45,7 +45,7 @@ class RequestBinanceWebSocket:
         # todo раскидать по  модельками в бд
         # сделаю завтра, если будет актуально
         
-        ...      
+        ...
 
 
     async def process_symbol(
@@ -140,7 +140,9 @@ class StreamBinanceWebSocket:
                 await self.connect()
                 break
             except websockets.ConnectionClosedError as ex:
-                logger.exception(ex)
+                if config.DEBUG:
+                    logger.exception(ex)
+                
                 logger.warning("Connection closed by the server. Reconnecting...")
                 await websocket.close()
                 await self.connect()

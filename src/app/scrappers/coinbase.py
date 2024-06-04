@@ -57,7 +57,9 @@ class UsdtCourseWebScoket:
                 await self.connect()
                 break
             except websockets.ConnectionClosedError as ex:
-                logger.exception(ex)
+                if config.DEBUG:
+                    logger.exception(ex)
+                
                 logger.warning("Connection closed by the server. Reconnecting...")
                 await websocket.close()
                 await self.connect()
