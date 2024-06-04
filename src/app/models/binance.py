@@ -1,5 +1,4 @@
 from sqlalchemy import Column, BigInteger, VARCHAR, DECIMAL
-from sqlalchemy.orm import relationship, Mapped
 
 from core.database.base import Base
 
@@ -10,10 +9,11 @@ class BookTickerStreamModel(Base):
     id = Column(BigInteger, primary_key=True)
     update_id = Column(BigInteger)
     symbol = Column(VARCHAR(10), index=True)
-    best_bid = Column(DECIMAL(18,8)) # Допустим это цена
-    bid_qty = Column(DECIMAL(18,8))
-    best_ask = Column(DECIMAL(18,8))
-    asq_qty = Column(DECIMAL(18,8))
+    best_bid = Column(DECIMAL(18, 8)) # Допустим это цена
+    bid_qty = Column(DECIMAL(18, 8))
+    best_ask = Column(DECIMAL(18, 8))
+    asq_qty = Column(DECIMAL(18, 8))
+    usdt_to_usd = Column(DECIMAL(10, 8))
     
 
 class AveragePriceStreamModel(Base):
@@ -24,5 +24,6 @@ class AveragePriceStreamModel(Base):
     event_time = Column(BigInteger)
     symbol = Column(VARCHAR(10), index=True)
     interval = Column(VARCHAR(5))
-    avg_price = Column(DECIMAL(18,8)) # Цена
+    avg_price = Column(DECIMAL(18, 8)) # Цена
     last_trade_time = Column(BigInteger)
+    usdt_to_usd = Column(DECIMAL(10, 8))

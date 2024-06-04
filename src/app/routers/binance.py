@@ -12,7 +12,7 @@ binance_router = APIRouter()
 
 @binance_router.get("/getcurr/ticker", tags=["data"])
 async def get_binance_cource(
-    currency: list[Literal["btcusdt", "ethusdt"]] = Query(),
+    currency: list[Literal["btcusdt", "ethusdt"]] = Query(["btcusdt", "ethusdt"]),
     db_session: AsyncSession = Depends(get_session)
 ):
     # Не совсем понял что именно в курсе трубется доставать
@@ -29,7 +29,7 @@ async def get_binance_cource(
     
 @binance_router.get("/getcurr/average", tags=["data"])
 async def get_binance_cource(
-    currency: list[Literal["btcusdt", "ethusdt"]] = Query(),
+    currency: list[Literal["btcusdt", "ethusdt"]] = Query(["btcusdt", "ethusdt"]),
     db_session: AsyncSession = Depends(get_session)
 ):
     # Не совсем понял что именно в курсе трубется доставать
@@ -46,7 +46,7 @@ async def get_binance_cource(
 
 @binance_router.get("/getcount/ticker", tags=["data"])
 async def get_binance_cource(
-    currency: list[Literal["btcusdt", "ethusdt"]] = Query(),
+    currency: list[Literal["btcusdt", "ethusdt"]] = Query(["btcusdt", "ethusdt"]),
     db_session: AsyncSession = Depends(get_session)
 ):
     """
@@ -61,7 +61,7 @@ async def get_binance_cource(
     
 @binance_router.get("/getcount/average", tags=["data"])
 async def get_binance_cource(
-    currency: list[Literal["btcusdt", "ethusdt"]] = Query(),
+    currency: list[Literal["btcusdt", "ethusdt"]] = Query(["btcusdt", "ethusdt"]),
     db_session: AsyncSession = Depends(get_session)
 ):
     """
