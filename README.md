@@ -58,7 +58,14 @@ nano .env
 python src/main.py
 ```
 
-## Time spent
+## Info
+
+
+Схема базы данных
+
+![alt text](assets/database.png)
+
+Затраченное время
 
 ![timemsg](assets/time.png)
 
