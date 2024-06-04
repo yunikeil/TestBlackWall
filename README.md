@@ -7,21 +7,33 @@
 по роуту можно получать курсы либо все, либо курсы только одной валютной пары
 
 * Postgres +
-* Redis - Есть обёртка, в пару строк, нехватка времени
+* Redis +
 * FastApi +
 * Pydantic +
-* Docker - Нехватка времени
+* Docker +
 
 
 ## Dependencies
 
-Для запуска вам потребуется Docker, python3.10+ python3-env, PostgreSQL, Redis, Debian-подобная система
+Для запуска вам потребуется Docker, или python3.10+ python3-env, PostgreSQL, Redis, Debian-подобная система
 
-> todo Docker compose start file
 
 ## Setup
 
-1. Запустим PostgreSQL командой
+1. Если есть docker-compose копируете файд переменных сред:
+
+```shell
+cp example.env .env
+```
+
+2. Запускаете
+```shell
+docker-compose up
+```
+
+Если нет:
+
+1. Запустим PostgreSQL командой (также требуется создать базу данных)
 ```shell
 sudo docker run --name some-postgres -e POSTGRES_PASSWORD=postgres --restart always -p  5432:5432 -d postgres
 ```
@@ -48,7 +60,6 @@ nano .env
 
 > todo .env info
 
-> todo Docker compose start file
 
 ## Start
 
