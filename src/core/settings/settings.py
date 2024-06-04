@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     DROP_TABLES: bool
     ECHO_SQL: bool
     
+    NEED_STREAM_DATA: bool
+    NEED_REQUEST_DATA: bool
+
     TITLE: str
     SUMMARY: str
     

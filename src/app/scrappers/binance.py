@@ -92,21 +92,10 @@ class ApiBinanceWebSocket:
 
 class StreamBinanceWebSocket:
     def __init__(self) -> None:
-        # Получение БОЛЬШОГО количества данных через stream
-        # С данным способом есть некоторые проблемы в виде отключения клиента от сервера
-        # Когда то отключает через минут 5, когда то через 15
-        #  попытался создать такое решение, но способ был описан на ноу нейм сайте, сомневаюсь в его работе
-        #  (websocket.ping_callback = self.on_ping)
-        # Если пинг не будет доходить, то на одном подключении код протянет 10 минут далее нужно будет переподключатсья (автоматически)
-        
+        # Получение БОЛЬШОГО количества данных через stream        
         self.ws_base_url = "wss://stream.binance.com:9443/stream"
         self.ticker_param = "?streams=btcusdt@bookTicker/ethusdt@bookTicker"
         self.avg_param = "/btcusdt@avgPrice/ethusdt@avgPrice"
-
-    @staticmethod
-    async def on_ping(websocket: websockets.WebSocketClientProtocol):
-        logger.info("Received ping from server, sending pong...")
-        await websocket.pong()
 
     async def connect(self):
         logger.info("Binance stream listener started!")
@@ -116,7 +105,6 @@ class StreamBinanceWebSocket:
                 async with websockets.connect(
                     ws_url, ping_interval=None, ping_timeout=None, close_timeout=None
                 ) as websocket:
-                    websocket.ping_callback = self.on_ping
                     await self.listen(websocket),
             except websockets.ConnectionClosedError:
                 logger.warning("Connection closed by the server. Reconnecting...")
